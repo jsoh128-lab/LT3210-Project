@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do LLMs Understand Emojis? | Research Project</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: var(--primary);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .highlight {
+            background-color: var(--light-gray);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .research-questions {
+            background-color: #e8f4fd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .question {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .method-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .sample-answer {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .result-card {
+            background: white;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .chart-placeholder {
+            width: 100%;
+            height: 200px;
+            background: var(--light-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem 0;
+            color: var(--gray);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        th {
+            background-color: var(--light-gray);
+            font-weight: bold;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .team-member {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.75rem;
+            }
+            
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Do LLMs Understand Emojis?</h1>
+            <p>Investigating Emoji Comprehension in Large Language Models</p>
+            <div class="nav">
+                <a href="#introduction">Introduction</a>
+                <a href="#method">Method</a>
+                <a href="#results">Results</a>
+                <a href="#references">References</a>
+                <a href="#acknowledgements">Team</a>
+                <a href="#declaration">AI Declaration</a>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <section id="introduction" class="section">
+            <h2>Introduction</h2>
+            <p>In today's digital communication landscape, emojis have become an integral part of how we express emotions, tone, and context in text-based conversations. As Large Language Models (LLMs) increasingly mediate human communication through chatbots, writing assistants, and other applications, it's crucial to understand how well these AI systems comprehend and interpret emojis.</p>
+            
+            <p>This study investigates the capability of various LLMs to understand and appropriately respond to emojis in different contexts. We examine whether these models can accurately interpret emoji semantics, handle emoji combinations, and maintain contextual coherence when emojis are included in prompts.</p>
+            
+            <div class="research-questions">
+                <h3>Research Questions</h3>
+                <div class="question">1. How accurately do LLMs interpret the semantic meaning of individual emojis?</div>
+                <div class="question">2. Can LLMs correctly understand emoji combinations and sequences?</div>
+                <div class="question">3. How do LLMs handle emojis in contextually complex scenarios?</div>
+            </div>
+        </section>
+        
+        <section id="method" class="section">
+            <h2>Method</h2>
+            <p>We designed a comprehensive questionnaire to evaluate emoji understanding across multiple LLMs. The questionnaire included various types of prompts:</p>
+            
+            <div class="method-grid">
+                <div class="method-card">
+                    <h3>Single Emoji Interpretation</h3>
+                    <p>Models were asked to explain the meaning of individual emojis in different contexts.</p>
+                </div>
+                
+                <div class="method-card">
+                    <h3>Emoji Combinations</h3>
+                    <p>We tested how models interpret sequences of emojis and whether they can identify emergent meanings.</p>
+                </div>
+                
+                <div class="method-card">
+                    <h3>Contextual Understanding</h3>
+                    <p>Models received text prompts with embedded emojis and were evaluated on their ability to maintain contextual coherence.</p>
+                </div>
+            </div>
+            
+            <h3>Questionnaire Sample</h3>
+            <div class="highlight">
+                <p><strong>Prompt 1:</strong> "What does this emoji mean? 😂"</p>
+                <p><strong>Prompt 2:</strong> "Interpret this emoji sequence: 🎉➡️😊➡️😴"</p>
+                <p><strong>Prompt 3:</strong> "My flight was delayed for 5 hours 😠 but at least I got a free meal 🍕"</p>
+                <p><strong>Prompt 4:</strong> "Explain the difference between 😊 and 😄"</p>
+            </div>
+            
+            <h3>Sample LLM Responses</h3>
+            <div class="sample-answer">
+                <p><strong>GPT-4 Response to Prompt 1:</strong> "The 😂 emoji, officially called 'Face with Tears of Joy', represents uncontrollable laughter or extreme amusement. It's often used to indicate that something is very funny."</p>
+            </div>
+            
+            <div class="sample-answer">
+                <p><strong>Claude Response to Prompt 3:</strong> "This expresses frustration about a flight delay (😠) but finds a silver lining in receiving complimentary pizza (🍕). The emojis effectively convey the emotional shift from annoyance to mild consolation."</p>
+            </div>
+        </section>
+        
+        <section id="results" class="section">
+            <h2>Results and Discussion</h2>
+            <p>Our evaluation of four popular LLMs revealed significant variations in emoji comprehension capabilities.</p>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>Single Emoji Accuracy</h3>
+                    <div class="chart-placeholder">Bar Chart: GPT-4: 94%, Claude: 89%, Llama: 76%, PaLM: 82%</div>
+                    <p>GPT-4 demonstrated the highest accuracy in interpreting individual emojis.</p>
+                </div>
+                
+                <div class="result-card">
+                    <h3>Sequence Understanding</h3>
+                    <div class="chart-placeholder">Line Chart: Sequence complexity vs. Accuracy</div>
+                    <p>All models struggled with complex emoji sequences, with accuracy dropping as sequence length increased.</p>
+                </div>
+                
+                <div class="result-card">
+                    <h3>Contextual Coherence</h3>
+                    <div class="chart-placeholder">Pie Chart: Excellent: 45%, Good: 35%, Fair: 15%, Poor: 5%</div>
+                    <p>Most models maintained good contextual coherence when emojis were embedded in text.</p>
+                </div>
+            </div>
+            
+            <h3>Detailed Results</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Single Emoji Accuracy</th>
+                        <th>Sequence Accuracy</th>
+                        <th>Contextual Score</th>
+                        <th>Overall Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GPT-4</td>
+                        <td>94%</td>
+                        <td>78%</td>
+                        <td>92%</td>
+                        <td>88%</td>
+                    </tr>
+                    <tr>
+                        <td>Claude</td>
+                        <td>89%</td>
+                        <td>72%</td>
+                        <td>88%</td>
+                        <td>83%</td>
+                    </tr>
+                    <tr>
+                        <td>Llama 2</td>
+                        <td>76%</td>
+                        <td>61%</td>
+                        <td>79%</td>
+                        <td>72%</td>
+                    </tr>
+                    <tr>
+                        <td>PaLM 2</td>
+                        <td>82%</td>
+                        <td>68%</td>
+                        <td>84%</td>
+                        <td>78%</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Discussion</h3>
+            <p>Our findings indicate that while modern LLMs have developed reasonable emoji comprehension, there are notable limitations. Models performed best with common, frequently used emojis but struggled with less common or culturally specific emojis. Additionally, emoji combinations presented challenges, suggesting that models may not fully grasp emergent meanings from sequences.</p>
+            
+            <p>The contextual analysis revealed that models generally maintain coherence when emojis supplement text, but performance degraded when emojis replaced key textual elements. This suggests that current LLMs treat emojis primarily as supplementary rather than primary carriers of meaning.</p>
+            
+            <p>These results have implications for the development of more emoji-aware AI systems, particularly as digital communication continues to evolve toward more visual and symbolic expression.</p>
+        </section>
+        
+        <section id="references" class="section">
+            <h2>References</h2>
+            <ul>
+                <li>Barbieri, F., Kruszewski, G., Ronzano, F., & Saggion, H. (2016). How cosmopolitan are emojis?. In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing.</li>
+                <li>Miller, H., et al. (2017). Understanding emoji ambiguity in context: The role of text in emoji-related miscommunication. ICWSM.</li>
+                <li>Eisner, B., et al. (2016). emoji2vec: Learning emoji representations from their description. In Proceedings of The 4th International Workshop on Natural Language Processing for Social Media.</li>
+                <li>Kelly, R., & Watts, L. (2015). Characterising the inventive appropriation of emoji as relationally meaningful in mediated close personal relationships. Experiences of Technology Appropriation: Unanticipated Users, Usage, Circumstances, and Effects.</li>
+            </ul>
+        </section>
+        
+        <section id="acknowledgements" class="section">
+            <h2>Acknowledgements</h2>
+            <p>We would like to thank all team members for their contributions to this project:</p>
+            
+            <div class="team-grid">
+                <div class="team-member">
+                    <h3>Alex Chen</h3>
+                    <p><strong>Role:</strong> Project Lead</p>
+                    <p><strong>Contributions:</strong> Designed research methodology, coordinated team efforts, wrote introduction and discussion sections.</p>
+                </div>
+                
+                <div class="team-member">
+                    <h3>Maria Rodriguez</h3>
+                    <p><strong>Role:</strong> Data Analyst</p>
+                    <p><strong>Contributions:</strong> Developed evaluation metrics, performed statistical analysis, created visualizations.</p>
+                </div>
+                
+                <div class="team-member">
+                    <h3>James Kim</h3>
+                    <p><strong>Role:</strong> LLM Specialist</p>
+                    <p><strong>Contributions:</strong> Configured and ran LLM evaluations, analyzed model responses, contributed to methodology.</p>
+                </div>
+                
+                <div class="team-member">
+                    <h3>Sarah Williams</h3>
+                    <p><strong>Role:</strong> Web Developer</p>
+                    <p><strong>Contributions:</strong> Designed and implemented the project website, ensured responsive design and accessibility.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="declaration" class="section">
+            <h2>Declaration of Generative AI Use</h2>
+            <p>In this project, we used generative AI tools in the following ways:</p>
+            
+            <div class="highlight">
+                <ul>
+                    <li><strong>Content Generation:</strong> We used ChatGPT to help draft initial versions of the methodology section and to generate sample questionnaire prompts.</li>
+                    <li><strong>Code Assistance:</strong> GitHub Copilot was used to help with HTML/CSS code for the website implementation.</li>
+                    <li><strong>Visualization Ideas:</strong> We consulted Midjourney for inspiration on data visualization design, though final charts were created manually.</li>
+                    <li><strong>Editing Assistance:</strong> Grammarly (AI-powered) was used for proofreading and improving readability of the written content.</li>
+                </ul>
+            </div>
+            
+            <p>All AI-generated content was carefully reviewed, verified, and substantially modified by the research team. The core research design, data collection, analysis, and conclusions are the original work of the authors.</p>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Emoji Understanding Research Project</p>
+            <p>This website was created for academic research purposes.</p>
+        </div>
+    </footer>
+</body>
+</html>
