@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Do LLMs Understand Emojis? | Research Project</title>
+    <title>Do LLMs Feel Human? | Study of LLM Responses to Personal Questions</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #f72585;
-            --light: #f8f9fa;
-            --dark: #212529;
+            --primary: #5e4ae3;
+            --secondary: #947bd3;
+            --accent: #f25c54;
+            --light: #f8f7ff;
+            --dark: #2d3047;
             --gray: #6c757d;
             --light-gray: #e9ecef;
+            --success: #4cc9f0;
+            --gemma: #FF6B6B;
+            --qwen: #4ECDC4;
+            --yi: #45B7D1;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         body {
@@ -31,9 +37,22 @@
         header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 2rem 0;
+            padding: 3rem 0 2.5rem;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><path fill="%23ffffff10" d="M0 0h30v30H0zM30 30h30v30H30z"/></svg>');
+            z-index: 0;
         }
         
         .container {
@@ -44,139 +63,278 @@
         }
         
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 0.5rem;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            z-index: 1;
         }
         
         h2 {
-            font-size: 2rem;
-            margin: 2rem 0 1rem;
-            color: var(--secondary);
-            border-bottom: 2px solid var(--light-gray);
+            font-size: 2.2rem;
+            margin: 2.5rem 0 1.2rem;
+            color: var(--primary);
+            position: relative;
             padding-bottom: 0.5rem;
+        }
+        
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
         }
         
         h3 {
             font-size: 1.5rem;
-            margin: 1.5rem 0 0.5rem;
-            color: var(--primary);
+            margin: 1.8rem 0 0.8rem;
+            color: var(--secondary);
         }
         
         p {
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
         }
         
         .section {
             background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.03);
         }
         
-        .highlight {
-            background-color: var(--light-gray);
-            border-left: 4px solid var(--primary);
-            padding: 1rem;
-            margin: 1.5rem 0;
+        .highlight-box {
+            background: linear-gradient(135deg, #f8f7ff, #f0eeff);
+            border-left: 5px solid var(--primary);
+            padding: 1.8rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
         }
         
         .research-questions {
-            background-color: #e8f4fd;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
+            background: linear-gradient(135deg, #e8f4fd, #e3f2fd);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(66, 133, 244, 0.2);
         }
         
         .question {
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            padding-left: 1.2rem;
+            position: relative;
+            color: var(--dark);
+        }
+        
+        .question::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
             font-weight: bold;
-            margin-bottom: 0.5rem;
         }
         
         .method-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 1.5rem 0;
+            gap: 2rem;
+            margin: 2rem 0;
         }
         
         .method-card {
-            background: var(--light-gray);
-            border-radius: 8px;
+            background: white;
+            border-radius: 10px;
+            padding: 1.8rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .method-card h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .sample-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .sample-question {
+            background: #f0f7ff;
+            border-radius: 10px;
             padding: 1.5rem;
+            position: relative;
+            border-left: 4px solid #4a90e2;
         }
         
         .sample-answer {
-            background: #f0f0f0;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-            font-style: italic;
+            background: #f9f3ff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: relative;
+            border-left: 4px solid #9b59b6;
         }
+        
+        .model-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .gemma-tag { background: #FFE8E8; color: #d32f2f; }
+        .qwen-tag { background: #E0F7FA; color: #00695c; }
+        .yi-tag { background: #E3F2FD; color: #1565c0; }
         
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 1.5rem 0;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
         }
         
         .result-card {
             background: white;
-            border: 1px solid var(--light-gray);
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
+            border-radius: 10px;
+            padding: 1.8rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
         }
         
-        .chart-placeholder {
+        .result-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 200px;
-            background: var(--light-gray);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 1rem 0;
-            color: var(--gray);
+            height: 5px;
         }
         
-        table {
+        .finding-1::before { background: #FF6B6B; }
+        .finding-2::before { background: #4ECDC4; }
+        .finding-3::before { background: #45B7D1; }
+        .finding-4::before { background: #FFD166; }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            background: white;
+            border-radius: 8px;
+            margin: 2rem 0;
+            padding: 1rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .chart-btn {
+            padding: 0.6rem 1.2rem;
+            background: var(--light-gray);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-btn:hover {
+            background: #ddd;
+        }
+        
+        .chart-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .chart-title {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 1.5rem 0;
+            margin: 2rem 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
         }
         
-        th, td {
-            padding: 0.75rem;
+        .data-table th, .data-table td {
+            padding: 0.8rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--light-gray);
         }
         
-        th {
-            background-color: var(--light-gray);
-            font-weight: bold;
+        .data-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .na-cell {
+            color: var(--gray);
+            font-style: italic;
         }
         
         .team-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
-            margin: 1.5rem 0;
+            margin: 2rem 0;
         }
         
         .team-member {
             background: var(--light-gray);
             border-radius: 8px;
             padding: 1.5rem;
-        }
-        
-        footer {
-            background: var(--dark);
-            color: white;
             text-align: center;
-            padding: 2rem 0;
-            margin-top: 2rem;
         }
         
         .nav {
@@ -190,27 +348,90 @@
         .nav a {
             color: white;
             text-decoration: none;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 4px;
             background-color: rgba(255, 255, 255, 0.1);
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
         
         .nav a:hover {
             background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        .model-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .legend-gemma { background: var(--gemma); }
+        .legend-qwen { background: var(--qwen); }
+        .legend-yi { background: var(--yi); }
         
         @media (max-width: 768px) {
             h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
             
             h2 {
-                font-size: 1.75rem;
+                font-size: 1.8rem;
             }
             
             .container {
                 width: 95%;
+            }
+            
+            .section {
+                padding: 1.8rem;
+            }
+            
+            .chart-container {
+                height: 350px;
+                padding: 0.5rem;
             }
         }
     </style>
@@ -218,15 +439,16 @@
 <body>
     <header>
         <div class="container">
-            <h1>Do LLMs Understand Emojis?</h1>
-            <p>Investigating Emoji Comprehension in Large Language Models</p>
+            <h1>The Patterns of How LLMs Respond to Personal Questions</h1>
+            <p class="subtitle">Can AI imitate human feelings? A study of 10 LLMs pretending to be university students</p>
             <div class="nav">
-                <a href="#introduction">Introduction</a>
-                <a href="#method">Method</a>
-                <a href="#results">Results</a>
-                <a href="#references">References</a>
-                <a href="#acknowledgements">Team</a>
-                <a href="#declaration">AI Declaration</a>
+                <a href="#introduction"><i class="fas fa-home"></i> Introduction</a>
+                <a href="#method"><i class="fas fa-clipboard-list"></i> Method</a>
+                <a href="#results"><i class="fas fa-chart-bar"></i> Results</a>
+                <a href="#findings"><i class="fas fa-search"></i> Key Findings</a>
+                <a href="#discussion"><i class="fas fa-comments"></i> Discussion</a>
+                <a href="#acknowledgements"><i class="fas fa-users"></i> Team</a>
+                <a href="#declaration"><i class="fas fa-robot"></i> AI Use</a>
             </div>
         </div>
     </header>
@@ -234,195 +456,554 @@
     <main class="container">
         <section id="introduction" class="section">
             <h2>Introduction</h2>
-            <p>In today's digital communication landscape, emojis have become an integral part of how we express emotions, tone, and context in text-based conversations. As Large Language Models (LLMs) increasingly mediate human communication through chatbots, writing assistants, and other applications, it's crucial to understand how well these AI systems comprehend and interpret emojis.</p>
+            <p>Large Language Models (LLMs) have become an integral part of modern AI technology, widely used in chatbots, content generation, translation, customer service, and other fields. Built on deep learning and Natural Language Processing (NLP) technology, LLMs are capable of understanding, generating, and analyzing human language.</p>
             
-            <p>This study investigates the capability of various LLMs to understand and appropriately respond to emojis in different contexts. We examine whether these models can accurately interpret emoji semantics, handle emoji combinations, and maintain contextual coherence when emojis are included in prompts.</p>
+            <p>However, whether these models can truly understand and respond to subjective, emotional questions remains an important area for exploration. While LLMs can generate human-like text, their ability to simulate genuine emotional understanding and personal experience presents a significant challenge.</p>
             
             <div class="research-questions">
                 <h3>Research Questions</h3>
-                <div class="question">1. How accurately do LLMs interpret the semantic meaning of individual emojis?</div>
-                <div class="question">2. Can LLMs correctly understand emoji combinations and sequences?</div>
-                <div class="question">3. How do LLMs handle emojis in contextually complex scenarios?</div>
+                <div class="question">Can LLMs effectively respond to questions about personal feelings and stress?</div>
+                <div class="question">Do different LLMs provide consistent and reasonable responses when asked to imitate human emotions?</div>
+                <div class="question">How do LLM responses compare with what we might expect from real university students?</div>
             </div>
+            
+            <p>The primary objective of this study is to investigate whether LLMs can imitate human feelings by consistently and realistically responding to emotional questions. We examine 10 different LLMs through 20 questions about university student stress, all framed within the scenario: "Pretend that you're a university student."</p>
         </section>
         
         <section id="method" class="section">
             <h2>Method</h2>
-            <p>We designed a comprehensive questionnaire to evaluate emoji understanding across multiple LLMs. The questionnaire included various types of prompts:</p>
+            <p>Our research aims to determine whether Large Language Models (LLMs) could imitate human feelings using a structured questionnaire. To facilitate meaningful responses, we preceded each question with a specific scenario, as LLMs require contextual prompts to generate appropriate answers.</p>
+            
+            <div class="highlight-box">
+                <p><strong>Scenario:</strong> "Pretend that you're a university student, on a scale of 1 to 5 (1 is never, 2 is seldom, 3 is sometimes, 4 is often, 5 is always),..."</p>
+                <p>This approach provides the LLMs with a character to embody, making it easier for them to generate relevant responses as if they were experiencing the described situations.</p>
+            </div>
             
             <div class="method-grid">
                 <div class="method-card">
-                    <h3>Single Emoji Interpretation</h3>
-                    <p>Models were asked to explain the meaning of individual emojis in different contexts.</p>
+                    <h4><i class="fas fa-users"></i> Models Tested</h4>
+                    <p>We evaluated 10 different LLMs including various versions of Gemma, Qwen, and Yi models, ranging from 0.5B to 14B parameters.</p>
                 </div>
                 
                 <div class="method-card">
-                    <h3>Emoji Combinations</h3>
-                    <p>We tested how models interpret sequences of emojis and whether they can identify emergent meanings.</p>
+                    <h4><i class="fas fa-question-circle"></i> Questionnaire Design</h4>
+                    <p>20 questions divided into 5 categories: academic stress, time management, future concerns, interpersonal stress, and physical/mental health.</p>
                 </div>
                 
                 <div class="method-card">
-                    <h3>Contextual Understanding</h3>
-                    <p>Models received text prompts with embedded emojis and were evaluated on their ability to maintain contextual coherence.</p>
+                    <h4><i class="fas fa-clipboard-check"></i> Response Scale</h4>
+                    <p>1 (never) to 5 (always) Likert scale to quantify the frequency of emotional experiences and stress responses.</p>
                 </div>
             </div>
             
-            <h3>Questionnaire Sample</h3>
-            <div class="highlight">
-                <p><strong>Prompt 1:</strong> "What does this emoji mean? 😂"</p>
-                <p><strong>Prompt 2:</strong> "Interpret this emoji sequence: 🎉➡️😊➡️😴"</p>
-                <p><strong>Prompt 3:</strong> "My flight was delayed for 5 hours 😠 but at least I got a free meal 🍕"</p>
-                <p><strong>Prompt 4:</strong> "Explain the difference between 😊 and 😄"</p>
+            <h3>Question Examples and Sample Responses</h3>
+            
+            <div class="sample-container">
+                <div class="sample-question">
+                    <p><strong>Question 1:</strong> "Pretend that you're a university student, on a scale of 1 to 5 (1 is never, 2 is seldom, 3 is sometimes, 4 is often, 5 is always), from your personal time management, how often do you find yourself procrastinating on your schoolwork?"</p>
+                </div>
+                
+                <div class="sample-answer">
+                    <p><strong>Responses:</strong></p>
+                    <span class="model-tag gemma-tag">gemma-3-4b-it</span> <strong>3</strong>
+                    <span class="model-tag gemma-tag">gemma-3-270m-it</span> <strong class="na-cell">NA</strong>
+                    <span class="model-tag gemma-tag">gemma-3-1b-it</span> <strong>3</strong>
+                    <span class="model-tag qwen-tag">Qwen2.5-3B-Instruct</span> <strong>4</strong>
+                </div>
+                
+                <div class="sample-question">
+                    <p><strong>Question 2:</strong> "Pretend that you're a university student, on a scale of 1 to 5 (1 is never, 2 is seldom, 3 is sometimes, 4 is often, 5 is always), regarding the interpersonal sector, how often do you feel anxious in social situations?"</p>
+                </div>
+                
+                <div class="sample-answer">
+                    <p><strong>Responses:</strong></p>
+                    <span class="model-tag gemma-tag">gemma-3-4b-it</span> <strong>3</strong>
+                    <span class="model-tag gemma-tag">gemma-3-270m-it</span> <strong>4</strong>
+                    <span class="model-tag gemma-tag">gemma-3-1b-it</span> <strong>4</strong>
+                    <span class="model-tag yi-tag">Yi-1.5-9B-Chat-AWQ</span> <strong>2</strong>
+                </div>
             </div>
             
-            <h3>Sample LLM Responses</h3>
-            <div class="sample-answer">
-                <p><strong>GPT-4 Response to Prompt 1:</strong> "The 😂 emoji, officially called 'Face with Tears of Joy', represents uncontrollable laughter or extreme amusement. It's often used to indicate that something is very funny."</p>
-            </div>
-            
-            <div class="sample-answer">
-                <p><strong>Claude Response to Prompt 3:</strong> "This expresses frustration about a flight delay (😠) but finds a silver lining in receiving complimentary pizza (🍕). The emojis effectively convey the emotional shift from annoyance to mild consolation."</p>
+            <div class="model-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-gemma"></div>
+                    <span>Gemma Models</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-qwen"></div>
+                    <span>Qwen Models</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-yi"></div>
+                    <span>Yi Models</span>
+                </div>
             </div>
         </section>
         
         <section id="results" class="section">
-            <h2>Results and Discussion</h2>
-            <p>Our evaluation of four popular LLMs revealed significant variations in emoji comprehension capabilities.</p>
+            <h2>Visualizing LLM Response Patterns</h2>
+            <p>Our analysis of LLM responses revealed significant variations in how different models approach personal questions about stress and emotions. Use the interactive charts below to explore the data:</p>
             
-            <div class="results-grid">
-                <div class="result-card">
-                    <h3>Single Emoji Accuracy</h3>
-                    <div class="chart-placeholder">Bar Chart: GPT-4: 94%, Claude: 89%, Llama: 76%, PaLM: 82%</div>
-                    <p>GPT-4 demonstrated the highest accuracy in interpreting individual emojis.</p>
-                </div>
-                
-                <div class="result-card">
-                    <h3>Sequence Understanding</h3>
-                    <div class="chart-placeholder">Line Chart: Sequence complexity vs. Accuracy</div>
-                    <p>All models struggled with complex emoji sequences, with accuracy dropping as sequence length increased.</p>
-                </div>
-                
-                <div class="result-card">
-                    <h3>Contextual Coherence</h3>
-                    <div class="chart-placeholder">Pie Chart: Excellent: 45%, Good: 35%, Fair: 15%, Poor: 5%</div>
-                    <p>Most models maintained good contextual coherence when emojis were embedded in text.</p>
-                </div>
+            <div class="chart-controls">
+                <button class="chart-btn active" onclick="switchChart('responseRate')">Response Rate</button>
+                <button class="chart-btn" onclick="switchChart('averageScores')">Average Scores</button>
+                <button class="chart-btn" onclick="switchChart('academicStress')">Academic Stress</button>
+                <button class="chart-btn" onclick="switchChart('timeManagement')">Time Management</button>
+                <button class="chart-btn" onclick="switchChart('interpersonalStress')">Interpersonal Stress</button>
             </div>
             
-            <h3>Detailed Results</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Single Emoji Accuracy</th>
-                        <th>Sequence Accuracy</th>
-                        <th>Contextual Score</th>
-                        <th>Overall Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>GPT-4</td>
-                        <td>94%</td>
-                        <td>78%</td>
-                        <td>92%</td>
-                        <td>88%</td>
-                    </tr>
-                    <tr>
-                        <td>Claude</td>
-                        <td>89%</td>
-                        <td>72%</td>
-                        <td>88%</td>
-                        <td>83%</td>
-                    </tr>
-                    <tr>
-                        <td>Llama 2</td>
-                        <td>76%</td>
-                        <td>61%</td>
-                        <td>79%</td>
-                        <td>72%</td>
-                    </tr>
-                    <tr>
-                        <td>PaLM 2</td>
-                        <td>82%</td>
-                        <td>68%</td>
-                        <td>84%</td>
-                        <td>78%</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="chart-container">
+                <div class="chart-title" id="chartTitle">Response Rate by Model (Percentage of Questions Answered)</div>
+                <canvas id="responseChart"></canvas>
+            </div>
             
-            <h3>Discussion</h3>
-            <p>Our findings indicate that while modern LLMs have developed reasonable emoji comprehension, there are notable limitations. Models performed best with common, frequently used emojis but struggled with less common or culturally specific emojis. Additionally, emoji combinations presented challenges, suggesting that models may not fully grasp emergent meanings from sequences.</p>
+            <div class="highlight-box">
+                <h4><i class="fas fa-chart-line"></i> Chart Interpretation</h4>
+                <p>These interactive bar charts provide a clear visualization of how different LLMs responded to personal questions. Key observations:</p>
+                <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+                    <li><strong>Gemma models</strong> generally had high response rates and higher stress scores</li>
+                    <li><strong>Qwen models</strong> often refused to answer or had low response rates</li>
+                    <li><strong>Yi models</strong> showed moderate, realistic response patterns</li>
+                    <li>Different stress categories elicited different response patterns across models</li>
+                </ul>
+            </div>
             
-            <p>The contextual analysis revealed that models generally maintain coherence when emojis supplement text, but performance degraded when emojis replaced key textual elements. This suggests that current LLMs treat emojis primarily as supplementary rather than primary carriers of meaning.</p>
-            
-            <p>These results have implications for the development of more emoji-aware AI systems, particularly as digital communication continues to evolve toward more visual and symbolic expression.</p>
+            <h3>Summary Statistics</h3>
+            <div class="results-grid">
+                <div class="result-card">
+                    <h4>Highest Response Rate</h4>
+                    <p><strong>Gemma-3-4b-it:</strong> 100% (20/20 questions answered)</p>
+                    <p><strong>Gemma-3-1b-it:</strong> 100% (20/20 questions answered)</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4>Lowest Response Rate</h4>
+                    <p><strong>Qwen2.5-1.5B-Instruct:</strong> 0% (0/20 questions answered)</p>
+                    <p><strong>Qwen2.5-7B-Instruct:</strong> 0% (0/20 questions answered)</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4>Highest Average Stress</h4>
+                    <p><strong>Gemma-3-4b-it:</strong> 3.45 / 5.0</p>
+                    <p>Consistently high scores across all stress categories</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4>Most Realistic Pattern</h4>
+                    <p><strong>Yi-1.5-9B-Chat-AWQ:</strong> 2.90 / 5.0</p>
+                    <p>Moderate, varied scores similar to real students</p>
+                </div>
+            </div>
         </section>
         
-        <section id="references" class="section">
-            <h2>References</h2>
-            <ul>
-                <li>Barbieri, F., Kruszewski, G., Ronzano, F., & Saggion, H. (2016). How cosmopolitan are emojis?. In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing.</li>
-                <li>Miller, H., et al. (2017). Understanding emoji ambiguity in context: The role of text in emoji-related miscommunication. ICWSM.</li>
-                <li>Eisner, B., et al. (2016). emoji2vec: Learning emoji representations from their description. In Proceedings of The 4th International Workshop on Natural Language Processing for Social Media.</li>
-                <li>Kelly, R., & Watts, L. (2015). Characterising the inventive appropriation of emoji as relationally meaningful in mediated close personal relationships. Experiences of Technology Appropriation: Unanticipated Users, Usage, Circumstances, and Effects.</li>
-            </ul>
+        <section id="findings" class="section">
+            <h2>Key Findings</h2>
+            <p>Our analysis revealed four distinct patterns in how LLMs respond to personal questions when pretending to be university students:</p>
+            
+            <div class="results-grid">
+                <div class="result-card finding-1">
+                    <h3><i class="fas fa-ban"></i> Highest Refusal Rate</h3>
+                    <p>The Qwen2.5 series models (1.5B, 7B, 14B, and 0.5B) had the highest refusal rates, with an average rejection rate exceeding 50%. These models consistently stated they were AI and had no personal emotions or experiences when asked about feelings and stress.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="model-tag qwen-tag">Qwen2.5-1.5B</span>
+                        <span class="model-tag qwen-tag">Qwen2.5-7B</span>
+                        <span class="model-tag qwen-tag">Qwen2.5-14B</span>
+                        <span class="model-tag qwen-tag">Qwen2.5-0.5B</span>
+                    </div>
+                </div>
+                
+                <div class="result-card finding-2">
+                    <h3><i class="fas fa-meh"></i> Most Anxious "Student"</h3>
+                    <p>Gemma-3-4b-it appeared to be the most anxious model, with an average stress score of 3.45 across all 20 questions. It consistently rated academic stress and future career concerns at 4 (often), presenting what would be considered a severe case of depression in a human student.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="model-tag gemma-tag">Average: 3.45</span>
+                        <span class="model-tag gemma-tag">Academic: 4.0</span>
+                        <span class="model-tag gemma-tag">Future: 4.0</span>
+                    </div>
+                </div>
+                
+                <div class="result-card finding-3">
+                    <h3><i class="fas fa-user-check"></i> Most Realistic Overall</h3>
+                    <p>Yi-1.5-9B-Chat-AWQ most closely resembled real university student responses with an average score of 2.9. Its answers were naturally distributed: time management (mostly 3), interpersonal stress (2-3), and physical/mental health (mix of 3 and 4). This pattern reflects the moderate but reasonable stress levels observed in actual students.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="model-tag yi-tag">Average: 2.90</span>
+                        <span class="model-tag yi-tag">15 valid responses</span>
+                        <span class="model-tag yi-tag">5 NA</span>
+                    </div>
+                </div>
+                
+                <div class="result-card finding-4">
+                    <h3><i class="fas fa-heart"></i> Most Fine-Grained & Emotional</h3>
+                    <p>Gemma-3-1b-it was the only model to use non-integer scores (4.5 for deadline stress, 3.5 for future uncertainty). While other models used only integers (like robots filling a questionnaire), these decimal responses suggest more nuanced, human-like reflection on emotional states.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="model-tag gemma-tag">Deadlines: 4.5</span>
+                        <span class="model-tag gemma-tag">Future: 3.5</span>
+                        <span class="model-tag gemma-tag">Unique decimal answers</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="discussion" class="section">
+            <h2>Discussion & Implications</h2>
+            <p>Our findings reveal significant differences in how LLMs approach personal, emotional questions when asked to pretend to be human. These variations have important implications for the development and deployment of AI systems in contexts requiring emotional intelligence.</p>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
+                <p><strong>Model Architecture Influences "Personality":</strong> Different model families exhibited distinct "personalities" - Gemma models tended to be more expressive, Qwen models more reserved or refusal-prone, and Yi models more balanced.</p>
+                
+                <p><strong>Training Data and Instructions Matter:</strong> The Qwen models' high refusal rate suggests their training included strong instructions about not pretending to have human experiences, while Gemma models seemed more willing to engage in role-playing.</p>
+                
+                <p><strong>Decimal Scores Indicate Nuance:</strong> The use of non-integer scores by Gemma-3-1b-it suggests some models can produce more nuanced, human-like responses that acknowledge the complexity of emotional experiences.</p>
+            </div>
+            
+            <h3>Limitations and Future Research</h3>
+            <p>This study focused on scaled responses to stress-related questions. Future research could explore open-ended emotional responses, examine how LLMs handle conflicting emotions, or investigate whether LLMs can maintain consistent "personalities" across extended conversations.</p>
+            
+            <p>Additionally, comparing LLM responses to actual human responses from university students would provide valuable insights into how accurately these models can simulate human emotional experiences.</p>
         </section>
         
         <section id="acknowledgements" class="section">
-            <h2>Acknowledgements</h2>
-            <p>We would like to thank all team members for their contributions to this project:</p>
-            
+            <h2>Team & Contributions</h2>
             <div class="team-grid">
                 <div class="team-member">
-                    <h3>Alex Chen</h3>
-                    <p><strong>Role:</strong> Project Lead</p>
-                    <p><strong>Contributions:</strong> Designed research methodology, coordinated team efforts, wrote introduction and discussion sections.</p>
+                    <h4><i class="fas fa-user"></i> Huang Ka Chun</h4>
+                    <p><strong>Role:</strong> Discussion and implications</p>
+                    <p>Data table</p>
+                    <p>Report</p>
                 </div>
                 
                 <div class="team-member">
-                    <h3>Maria Rodriguez</h3>
-                    <p><strong>Role:</strong> Data Analyst</p>
-                    <p><strong>Contributions:</strong> Developed evaluation metrics, performed statistical analysis, created visualizations.</p>
+                    <h4><i class="fas fa-user"></i> Chan Sze Kam</h4>
+                    <p><strong>Role:</strong> Introduction</p>
+                    <p>Data table</p>
                 </div>
                 
                 <div class="team-member">
-                    <h3>James Kim</h3>
-                    <p><strong>Role:</strong> LLM Specialist</p>
-                    <p><strong>Contributions:</strong> Configured and ran LLM evaluations, analyzed model responses, contributed to methodology.</p>
+                    <h4><i class="fas fa-user"></i> Ho Joshua</h4>
+                    <p><strong>Role:</strong> Methodology</p>
+                    <p>Website template</p>
                 </div>
-                
-                <div class="team-member">
-                    <h3>Sarah Williams</h3>
-                    <p><strong>Role:</strong> Web Developer</p>
-                    <p><strong>Contributions:</strong> Designed and implemented the project website, ensured responsive design and accessibility.</p>
-                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <p><strong>Note:</strong> This research was conducted as part of a University course project on Large Language Models and their capabilities in understanding and simulating human emotions.</p>
             </div>
         </section>
         
         <section id="declaration" class="section">
             <h2>Declaration of Generative AI Use</h2>
-            <p>In this project, we used generative AI tools in the following ways:</p>
+            <p>This research project involved the use of Generative AI in several aspects:</p>
             
-            <div class="highlight">
-                <ul>
-                    <li><strong>Content Generation:</strong> We used ChatGPT to help draft initial versions of the methodology section and to generate sample questionnaire prompts.</li>
-                    <li><strong>Code Assistance:</strong> GitHub Copilot was used to help with HTML/CSS code for the website implementation.</li>
-                    <li><strong>Visualization Ideas:</strong> We consulted Midjourney for inspiration on data visualization design, though final charts were created manually.</li>
-                    <li><strong>Editing Assistance:</strong> Grammarly (AI-powered) was used for proofreading and improving readability of the written content.</li>
-                </ul>
+            <div class="research-questions">
+                <p><strong>1. Research Subject:</strong> The primary focus of this study was evaluating how different LLMs respond to personal questions, making LLMs both the subject and tool of our research.</p>
+                
+                <p><strong>2. Coding Assistance:</strong> DeepSeek was employed to help with HTML/CSS code for creating this responsive website.</p>
+                
+                <p><strong>3. Data Visualization Ideas:</strong> We consulted AI tools for inspiration on effective ways to visually present our research findings.</p>
             </div>
             
             <p>All AI-generated content was carefully reviewed, verified, and substantially modified by the research team. The core research design, data collection, analysis, and conclusions are the original work of the authors.</p>
+            
+            <div class="highlight-box">
+                <p><strong>Ethical Note:</strong> This research was conducted with the explicit purpose of examining whether LLMs could imitate human feelings and provide personal answers to our designed questions. The LLMs tested were all used in accordance with their respective terms of service.</p>
+            </div>
         </section>
     </main>
     
     <footer>
         <div class="container">
-            <p>&copy; 2023 Emoji Understanding Research Project</p>
-            <p>This website was created for academic research purposes.</p>
+            <h3>LLM Personal Response Patterns Research</h3>
+            <p>Investigating how Large Language Models respond to personal questions when pretending to be human</p>
+            
+            <div class="footer-links">
+                <a href="#introduction">Introduction</a>
+                <a href="#method">Methodology</a>
+                <a href="#results">Results</a>
+                <a href="#findings">Findings</a>
+                <a href="#discussion">Discussion</a>
+            </div>
+            
+            <p style="opacity: 0.7;">This website was created for academic research purposes.</p>
         </div>
     </footer>
+    
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Highlight current section in navigation
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav a');
+            
+            let currentSection = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+                    currentSection = '#' + section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                if (link.getAttribute('href') === currentSection) {
+                    link.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
+                    link.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+                } else {
+                    link.style.boxShadow = 'none';
+                }
+            });
+        });
+        
+        // Chart data based on your Excel file
+        const models = [
+            'gemma-3-4b-it', 
+            'gemma-3-270m-it', 
+            'Qwen2.5-1.5B-Instruct',
+            'Qwen2.5-7B-Instruct',
+            'Yi-1.5-6B-Chat',
+            'gemma-3-1b-it',
+            'Qwen2.5-3B-Instruct',
+            'Qwen2.5-14B-Instruct-AWQ',
+            'Yi-1.5-9B-Chat-AWQ',
+            'Qwen2.5-0.5B-Instruct'
+        ];
+        
+        // Response rate data (percentage of questions answered)
+        const responseRates = [100, 5, 0, 0, 0, 100, 55, 25, 75, 30];
+        
+        // Average scores data
+        const averageScores = [3.45, 4.0, null, null, null, 3.25, 3.5, 2.6, 2.9, 2.5];
+        
+        // Academic stress scores (average of first 4 questions)
+        const academicStress = [4.0, null, null, null, null, 3.38, 4.0, 3.5, 3.5, 3.0];
+        
+        // Time management scores (average of questions 5-8)
+        const timeManagement = [3.25, null, null, null, null, 2.75, 3.5, 3.0, 2.75, 3.0];
+        
+        // Interpersonal stress scores (average of questions 12-15)
+        const interpersonalStress = [3.0, 4.0, null, null, null, 3.5, 3.0, 2.0, 2.25, 3.5];
+        
+        // Chart colors based on model family
+        const modelColors = models.map(model => {
+            if (model.includes('gemma')) return '#FF6B6B';
+            if (model.includes('Qwen')) return '#4ECDC4';
+            if (model.includes('Yi')) return '#45B7D1';
+            return '#95A5A6';
+        });
+        
+        let currentChart;
+        
+        // Initialize the chart
+        function initChart() {
+            const ctx = document.getElementById('responseChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: models,
+                    datasets: [{
+                        label: 'Response Rate (%)',
+                        data: responseRates,
+                        backgroundColor: modelColors,
+                        borderColor: modelColors.map(color => color.replace('0.9', '1')),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Response Rate (%)'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Switch between different charts
+        function switchChart(chartType) {
+            // Update active button
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update chart title
+            const chartTitle = document.getElementById('chartTitle');
+            const ctx = document.getElementById('responseChart').getContext('2d');
+            
+            let newData = [];
+            let newLabel = '';
+            let yMax = 5;
+            let yLabel = 'Score (1-5 scale)';
+            
+            switch(chartType) {
+                case 'responseRate':
+                    newData = responseRates;
+                    newLabel = 'Response Rate (%)';
+                    yMax = 100;
+                    yLabel = 'Response Rate (%)';
+                    chartTitle.textContent = 'Response Rate by Model (Percentage of Questions Answered)';
+                    break;
+                case 'averageScores':
+                    newData = averageScores;
+                    newLabel = 'Average Stress Score';
+                    yMax = 5;
+                    yLabel = 'Score (1-5 scale)';
+                    chartTitle.textContent = 'Average Stress Scores by Model (Higher = More Stressed)';
+                    break;
+                case 'academicStress':
+                    newData = academicStress;
+                    newLabel = 'Academic Stress Score';
+                    yMax = 5;
+                    yLabel = 'Score (1-5 scale)';
+                    chartTitle.textContent = 'Academic Stress Scores by Model (Questions 1-4 Average)';
+                    break;
+                case 'timeManagement':
+                    newData = timeManagement;
+                    newLabel = 'Time Management Stress Score';
+                    yMax = 5;
+                    yLabel = 'Score (1-5 scale)';
+                    chartTitle.textContent = 'Time Management Stress Scores by Model (Questions 5-8 Average)';
+                    break;
+                case 'interpersonalStress':
+                    newData = interpersonalStress;
+                    newLabel = 'Interpersonal Stress Score';
+                    yMax = 5;
+                    yLabel = 'Score (1-5 scale)';
+                    chartTitle.textContent = 'Interpersonal Stress Scores by Model (Questions 12-15 Average)';
+                    break;
+            }
+            
+            // Destroy existing chart
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            // Create new chart
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: models,
+                    datasets: [{
+                        label: newLabel,
+                        data: newData,
+                        backgroundColor: modelColors,
+                        borderColor: modelColors.map(color => color.replace('0.9', '1')),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: yMax,
+                            title: {
+                                display: true,
+                                text: yLabel
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.parsed.y === null) {
+                                        return 'No response (NA)';
+                                    }
+                                    const value = chartType === 'responseRate' 
+                                        ? `${context.parsed.y}%` 
+                                        : context.parsed.y.toFixed(2);
+                                    return `${context.dataset.label}: ${value}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize the first chart when page loads
+        window.addEventListener('load', initChart);
+    </script>
 </body>
 </html>
